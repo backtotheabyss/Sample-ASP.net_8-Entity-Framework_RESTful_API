@@ -51,5 +51,15 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
             [Required]
             public string ContactName { get; set; } = string.Empty;
         }
+
+        public class ProductResultDTO
+        {
+            public string CategoryName { get; set; } = string.Empty;
+            public int CategoryID { get; set; }
+            public int ProductID { get; set; }
+            public string ProductName { get; set; } = string.Empty;
+            public decimal UnitPrice { get; set; }
+            public bool Discontinued { get; set; }
+        }
     }
 }
