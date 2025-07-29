@@ -206,7 +206,6 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
             }
         }
 
-        // DELETE api/<controller>/5
         [HttpDelete]
         [Route("customer")]
         public ActionResult<string> customerDelete(string idCustomer)
