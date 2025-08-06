@@ -106,7 +106,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                     {
                         // CategoryName = dsData["CategoryName"] != DBNull.Value ? Convert.ToString(dsData["CategoryName"])!.Trim() : string.Empty,
                         CategoryId = dsData["CategoryId"] != DBNull.Value ? Convert.ToInt32(dsData["CategoryId"]) : 0,
-                        ProductId = dsData["Product"] != DBNull.Value ? Convert.ToInt32(dsData["ProductId"]) : 0,
+                        ProductId = dsData["ProductId"] != DBNull.Value ? Convert.ToInt32(dsData["ProductId"]) : 0,
                         ProductName = dsData["ProductName"] != DBNull.Value ? Convert.ToString(dsData["ProductName"])!.Trim() : string.Empty,
                         UnitPrice = dsData["UnitPrice"] != DBNull.Value ? Convert.ToDecimal(dsData["UnitPrice"]) : 0,
                         Discontinued = dsData["Discontinued"] != DBNull.Value ? Convert.ToBoolean(dsData["Discontinued"]) : false
