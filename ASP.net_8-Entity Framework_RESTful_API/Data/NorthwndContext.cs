@@ -75,8 +75,6 @@ public partial class NorthwndContext : DbContext
 
     public virtual DbSet<Territory> Territories { get; set; }
 
-    public virtual DbSet<TodoList> TodoLists { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=SCRAPING\\SQLSERVERDEV;Database=NORTHWND;User Id=sa;Password=Abducted27641299;TrustServerCertificate=True;");
@@ -639,11 +637,6 @@ public partial class NorthwndContext : DbContext
                 .HasForeignKey(d => d.RegionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Territories_Region");
-        });
-
-        modelBuilder.Entity<TodoList>(entity =>
-        {
-            entity.ToTable("TodoList");
         });
 
         OnModelCreatingPartial(modelBuilder);
