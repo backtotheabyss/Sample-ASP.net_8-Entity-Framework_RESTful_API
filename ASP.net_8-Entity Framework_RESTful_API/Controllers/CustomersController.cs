@@ -44,7 +44,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
 
             try
             {
-                var customers = await _context.Customers
+                List<Customer> customers = await _context.Customers
                     .Where(c => c.CustomerId == Id)                    
                     .ToListAsync();
 
