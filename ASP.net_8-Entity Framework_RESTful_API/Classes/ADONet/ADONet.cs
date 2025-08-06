@@ -1,41 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.OleDb;
-using Microsoft.Data.Sql;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
+using Npgsql;
+using MySql.Data.MySqlClient;
+using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 
 namespace ASP.net_8_Entity_Framework_RESTful_API
 {
-    class ADONet
+    public class ADONet
     {
-        /* ADO.net */        
-        /* connection - MySQL */
-        /* public MySqlConnection connectionMySQL; */        
-		
-		/* connection - Access 97/2000 */
-		/*public OleDbConnection connectionOLEDB;*/
-		
-		/* connection - SQL Server */
-        public SqlConnection connectionSQLServer;
+        private readonly IConfiguration _configuration;
 
-        /* connection - connection string */
-        /*public const connectionStringMySQL = "SERVER=34.76.45.236; DATABASE=data_team; UID=diego;PASSWORD=J6ZMJ-XHrRb3c-JKjMWH; default command timeout=480";*/
-        /* dev */
-        /* public const string connectionStringMySQL = "SERVER=34.76.45.236; DATABASE=zoho_crm; UID=diego;PASSWORD=J6ZMJ-XHrRb3c-JKjMWH; default command timeout = 480"; */
+        /* connection - PostgreSQL */
+        // public NpgsqlConnection connectionPostgreSQL;
+
+        /* connection - Acess 97/2000 */
+        // public OLEDBConnection connectionAccess;
 
         /* connection - SQL Server */
-        //public const string connectionStringSQLServer = "Server=tcp:aspdotnet-7-restful-apidbserver.database.windows.net,1433;Initial Catalog=NORTHWND;Persist Security Info=False;User ID=dsendra;Password=Venom_666;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-        //public const string connectionStringSQLServer = "SERVER=34.76.45.236; DATABASE=zoho_crm; UID=diego;PASSWORD=J6ZMJ-XHrRb3c-JKjMWH; default command timeout = 480";
-        /* dev */
-        public const string connectionStringSQLServer = "Server = SCRAPING\\SQLSERVERDEV; User ID =sa; Password=Abducted27641299; Database = NORTHWND; Trusted_Connection = No; Encrypt = False;";
+        public SqlConnection connectionSQLServer;
 
-        /* connection - Access 97/2000 */
-        /*public const string connectionStringAccess = "SERVER=34.76.45.236; DATABASE=zoho_crm; UID=diego;PASSWORD=J6ZMJ-XHrRb3c-JKjMWH; default command timeout = 480";*/
+        /* connection - MySQL */
+        public MySqlConnection connectionMySQL;
+
+        public ADONet(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         public SqlConnection connectionOpen(SqlConnection pSQLServerConnection, int piconnectionType)
+        {
+            //connection - open
+            switch (piconnectionType)
+            {
+                case 2:
+                    {
+                        /* connection - SQL Server - open */
+                        pSQLServerConnection = new SqlConnection(_configuration.GetConnectionString("connectionStringSQLServer") /* connectionStringSQLServer */);
+                        pSQLServerConnection.Open();
+                        break;
+                    }
+            }
+            
+            return (pSQLServerConnection);
+        }
+
+        public MySqlConnection connectionOpen(MySqlConnection pConnection, int piconnectionType)
         {
             //connection - open
             switch (piconnectionType)
@@ -43,29 +51,48 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                 case 1:
                     {
                         /* connection - MYSQL - open */
-                        /*pMySqlConnection = new MySqlConnection(connectionStringMySQL);
-                        pMySqlConnection.Open();*/
-                        break;
-                    }
-
-                case 2:
-                    {
-                        /* connection - SQL Server - open */
-                        pSQLServerConnection = new SqlConnection(connectionStringSQLServer);
-                        pSQLServerConnection.Open();
-                        break;
-                    }
-
-                case 3:
-                    {
-                        /* connection - Access 97/2000 - open */
-                        /*pconnectionOLEDB = new OleDbConnection(connectionStringAccess);
-                        pconnectionOLEDB.Open();*/
+                        pConnection = new MySqlConnection(_configuration.GetConnectionString("connectionStringMySQL"));
+                        pConnection.Open();
                         break;
                     }
             }
-            
-            return (pSQLServerConnection);
+
+            return (pConnection);
+        }
+
+        //public OleDbConnection connectionOpen(SqlConnection pConnection, int piconnectionType)
+        //{
+        //    //connection - open
+        //    switch (piconnectionType)
+        //    {
+
+        //        case 3:
+        //            {
+        //                /* connection - Access 97/2000 - open */
+        //                pConnection = new OleDbConnection((_configuration.GetConnectionString("connectionStringAccess");                        
+        //                pConnection.Open();
+        //                break;
+        //            }
+        //    }
+
+        //    return (pConnection);
+        //}
+
+        public NpgsqlConnection connectionOpen(NpgsqlConnection pConnection, int piconnectionType)
+        {
+            //connection - open
+            switch (piconnectionType)
+            {
+                case 4:
+                    {
+                        /* connection - Postgre SQL - open */
+                        pConnection = new NpgsqlConnection(_configuration.GetConnectionString("connectionStringPostgreSQL"));
+                        pConnection.Open();
+                        break;
+                    }
+            }
+
+            return (pConnection);
         }
     }
 }

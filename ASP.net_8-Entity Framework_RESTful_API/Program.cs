@@ -1,11 +1,5 @@
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Threading;
-using System.Threading.Tasks;
+using Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +14,9 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+builder.Services.AddDbContext<NorthwndContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("connectionStringSQLServer"))
+);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -27,7 +24,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Additional service for background task
-builder.Services.AddSingleton<Increment>();
+// builder.Services.AddSingleton<Increment>();
 
 var app = builder.Build();
 
@@ -36,7 +33,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("swagger/v1/swagger.json", "ASP.NET 7 RESTful API");
+    c.SwaggerEndpoint("swagger/v1/swagger.json", "reply ");
     c.RoutePrefix = string.Empty;
 });
 

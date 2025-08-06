@@ -1,8 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sql;
+
 using Microsoft.Data.Sql;
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Models;
 using Newtonsoft.Json;
-using static ASP.net_8_Entity_Framework_RESTful_API.DTOs;
+using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations;
+using static Models.Customer;
+using static Models.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASP.net_8_Entity_Framework_RESTful_API
@@ -10,32 +21,139 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
     [Route("api/customers")]
     [ApiController]
     public class CustomersController : ControllerBase
-    {        
+    {
+        private readonly NorthwndContext _context;
+        private readonly IConfiguration _configuration;
+
+        public CustomersController (NorthwndContext context, IConfiguration configuration)
+        {
+            _context = context;
+            _configuration = configuration;
+        }
+
+        [HttpGet]
+        [Route("customerEF")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>))]
+        [ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        public async Task<ActionResult<Response<Customer>>> customerEF([FromQuery, Required] string Id)
+        {
+            Response<Customer> listCustomers = new Response<Customer>();
+
+            try
+            {
+                var customers = await _context.Customers
+                    .Where(c => c.CustomerId == Id)                    
+                    .ToListAsync();
+
+                if (customers != null && customers.Count > 0)
+                {
+                    /* customers */
+                    if (listCustomers.Results == null)
+                        listCustomers.Results = new List<Customer>();
+
+                    listCustomers = new Response<Customer>
+                    {
+                        Results = customers,
+                        TotalCount = customers.Count
+                    };
+
+                    return Ok(listCustomers);
+                }
+                else
+                    return NotFound(new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status404NotFound.ToString(),
+                        ErrorMessage = "No customer have been found."
+                    });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
+                {
+                    ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
+                    ErrorMessage = "Internal server error: " + ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("customersEF")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>))]
+        [ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        public async Task<ActionResult<Response<Customer>>> customersEF([FromQuery, Required] int rows)
+        {
+            Response<Customer> listCustomers = new Response<Customer>();
+
+            try
+            {
+                var customers = await _context.Customers
+                    .Take(rows)
+                    .ToListAsync();
+
+                if (customers != null && customers.Count > 0)
+                {
+                    /* customers */
+                    if (listCustomers.Results == null)
+                        listCustomers.Results = new List<Customer>();
+
+                    listCustomers = new Response<Customer>
+                    {
+                        Results = customers,
+                        TotalCount = customers.Count
+                    };
+
+                    return Ok(listCustomers);
+                }
+                else
+                    return NotFound(new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status404NotFound.ToString(),
+                        ErrorMessage = "No customers have been found."
+                    });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
+                {
+                    ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
+                    ErrorMessage = "Internal server error: " + ex.Message
+                });
+            }
+        }
+
         [HttpGet]
         [Route("customers")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseDTO<CustomerResultDTO>)),
-        // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<CustomerResultDTO>)),
-        ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponseDTO)),
-        ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseDTO)),
-        ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponseDTO)),
-        ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponseDTO))]
-        public async Task<ActionResult<ResponseDTO<CustomerResultDTO>>> customers([FromQuery] int value)        
-        // public async Task<ActionResult<List<CustomerResultDTO>>> customers([FromQuery] int value)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>)),
+        // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
+        ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        public async Task<ActionResult<Response<Customer>>> customers([FromQuery, Required] int rows)
+        // public async Task<ActionResult<List<Customer>>> customers([FromQuery] int value)
         {
             SqlCommand sqlCommand;
             SqlDataReader dsData = null;
             string tError = string.Empty;
 
-            ResponseDTO<CustomerResultDTO> listCustomers = new ResponseDTO<CustomerResultDTO>();
-            // List<CustomerResultDTO> listCustomers = new List<CustomerResultDTO>();
+            Response<Customer> listCustomers = new Response<Customer>();
+            // List<Customer> listCustomers = new List<Customer>();
 
-            ADONet objADONet = new ADONet();
+            ADONet objADONet = new ADONet(_configuration);
 
             try
             {
                 objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
 
-                sqlCommand = new SqlCommand("select TOP " + value.ToString() + " CustomerID, ContactName from Customers", objADONet.connectionSQLServer);
+                sqlCommand = new SqlCommand("select TOP " + rows.ToString() + " Id, ContactName, CompanyName from Customers", objADONet.connectionSQLServer);
                 dsData = sqlCommand.ExecuteReader();
 
                 if (dsData.HasRows)
@@ -43,17 +161,18 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                     while (dsData.Read())
                     {
                         /* customer */
-                        CustomerResultDTO customer = new CustomerResultDTO
+                        Customer customer = new Customer
                         {
-                            CustomerID = dsData["CustomerID"] != DBNull.Value ? Convert.ToString(dsData["CustomerID"])!.Trim() : "",
+                            CustomerId = dsData["CustomerId"] != DBNull.Value ? Convert.ToString(dsData["CustomerId"])!.Trim() : "",
                             ContactName = dsData["ContactName"] != DBNull.Value ? Convert.ToString(dsData["ContactName"])!.Trim() : "",
+                            CompanyName = dsData["CompanyName"] != DBNull.Value ? Convert.ToString(dsData["CompanyName"])!.Trim() : "",
                         };
 
                         /* customers */
                         // listCustomers.Add(customer);
 
                         if (listCustomers.Results == null)
-                            listCustomers.Results = new List<CustomerResultDTO>();
+                            listCustomers.Results = new List<Customer>();
 
                         listCustomers.Results.Add(customer);
                     }
@@ -65,7 +184,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                     tError = "No customers have been found.";
 
                     return StatusCode(StatusCodes.Status404NotFound,
-                        new ErrorResponseDTO
+                        new ErrorResponse
                         {
                             ErrorCode = StatusCodes.Status404NotFound.ToString(),
                             ErrorMessage = tError
@@ -87,151 +206,277 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ErrorResponseDTO
+                    new ErrorResponse
                     {
                         ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
                         ErrorMessage = tError,
-                        ErrorDetails = new List<ErrorDetailDTO>
+                        ErrorDetails = new List<ErrorDetail>
                         {
-                            new ErrorDetailDTO
+                            new ErrorDetail
                             {
                                 InternalErrorCode = 500,
                                 Detail = e.Message
                             }
                         }
                     });
-            }            
-        }
-
-        [HttpPost]
-        [Route("customers")]        
-        public ActionResult<string> customers([FromBody]object jsonData)
-        {
-            SqlCommand sqlCommand, sqlCommandInsert;
-            SqlDataReader dsData;
-            string tCustomerID, tContactName;
-
-            //if (string.IsNullOrEmpty(jsonData))
-            //{
-            //    return BadRequest("Invalid JSON data.");
-            //}
-
-            ADONet objADONet = new ADONet();
-            objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
-
-            // Deserialize the JSON string to a specific data type (e.g., List<Dictionary<string, object>>)
-            try
-            {
-                string jsonString = jsonData.ToString(); // Cast the object to a string
-                List<Dictionary<string, object>> jsonDataAux = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(jsonString);
-
-                // Process the data as needed
-                foreach (var item in jsonDataAux)
-                {
-                    tCustomerID = item["CustomerID"].ToString();
-                    tContactName = item["ContactName"].ToString();
-
-                    sqlCommand = new SqlCommand("select CustomerID from Customers where CustomerID = '" + tCustomerID + "'", objADONet.connectionSQLServer);
-                    dsData = sqlCommand.ExecuteReader();
-                    if (!dsData.HasRows)
-                    {
-                        dsData.Close();
-                        sqlCommandInsert = new SqlCommand("insert into Customers (CustomerID, ContactName, CompanyName) values ('" + tCustomerID + "','" + tContactName + "', '')",
-                            objADONet.connectionSQLServer);                        
-                    }
-                    else
-                    {
-                        dsData.Close();
-                        sqlCommandInsert = new SqlCommand("update Customers set ContactName = '" + tContactName + "' where CustomerID = '" + tCustomerID + "'",
-                                objADONet.connectionSQLServer);
-                        
-                    }
-                    sqlCommandInsert.ExecuteNonQuery();
-                }
-
-                objADONet.connectionSQLServer.Close();
-                objADONet.connectionSQLServer = null;
-                objADONet = null;
-
-                return Ok("Customers inserted/updated succesfuly.");
-            }
-            catch (JsonException)
-            {
-                return Ok("Invalid JSON format.");
             }
         }
 
         [HttpPut]
-        [Route("customer")]
-        public ActionResult<string> customer([FromBody] object jsonData)
+        [Route("customerEditEF")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
+        // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
+        ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        public async Task<ActionResult<Response<Customer>>> customerEditEF([FromBody] CustomerRequest customerPayload)
         {
-            SqlCommand sqlCommand;
-            string tCustomerID, tContactName;
-
-            ADONet objADONet = new ADONet();
-            objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
-
             try
-            {
-                string jsonString = jsonData.ToString(); // Cast the object to a string
-                List<Dictionary<string, object>> jsonDataAux = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(jsonString);
-
-                try
+            {                
+                Customer customer = await _context.Customers.FindAsync(customerPayload.CustomerId);
+                if (customer == null)
                 {
-                    tCustomerID = jsonDataAux[0]["CustomerID"].ToString();
-                    tContactName = jsonDataAux[0]["ContactName"].ToString();
-
-                    sqlCommand = new SqlCommand("insert into Customers (CustomerID, ContactName, CompanyName) values ('" + tCustomerID + "','" + tContactName + "', '')",
-                        objADONet.connectionSQLServer);
-                    sqlCommand.ExecuteNonQuery();
-
-                    objADONet.connectionSQLServer.Close();
-                    objADONet.connectionSQLServer = null;
-                    objADONet = null;
-
-                    return (Ok("Single customer inserted succesfuly."));
+                    return StatusCode(StatusCodes.Status404NotFound, new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status404NotFound.ToString(),
+                        ErrorMessage = customerPayload.CustomerId + " doesn't exists."
+                    });
                 }
-                catch (Exception Ex)
+                else
                 {
-                    objADONet.connectionSQLServer.Close();
-                    objADONet.connectionSQLServer = null;
-                    objADONet = null;
-
-                    return (Ok("Customer already exists."));
+                    customer.ContactName = customerPayload.ContactName;
+                    customer.CompanyName = customerPayload.CompanyName;
+                        
+                    await _context.SaveChangesAsync();
                 }
+
+                return Ok(new GeneralResponse<string>
+                {
+                    Response = customerPayload.ContactName + " has been edited succesfuly."
+                });
+                
             }
-            catch (JsonException)
+            catch (Exception e)
             {
-                return Ok("Invalid JSON format.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
+                        ErrorMessage = "Internal Server Error",
+                        ErrorDetails = new List<ErrorDetail>
+                        {
+                            new ErrorDetail
+                            {
+                                InternalErrorCode = 500,
+                                Detail = e.Message
+                            }
+                        }
+                    });
             }
         }
 
         [HttpDelete]
-        [Route("customer")]
-        public ActionResult<string> customerDelete(string idCustomer)
+        [Route("customerDeleteEF")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
+        // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
+        ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        public async Task<ActionResult<Response<Customer>>> customerDeleteEF(string Id)
         {
-            SqlCommand sqlCommand, sqlCommandDelete;
-            SqlDataReader dsData = null;
+            try
+            {                
+                Customer customer = await _context.Customers.FindAsync(Id);
+                if (customer == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status404NotFound.ToString(),
+                        ErrorMessage = Id + " doesn't exists."
+                    });
+                }
+                else
+                {
+                    _context.Customers.Remove(customer);
+                    await _context.SaveChangesAsync();
+                }
 
-            ADONet objADONet = new ADONet();
-            objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
-
-            sqlCommand = new SqlCommand("select CustomerID from Customers where CustomerID = '" + idCustomer + "'", objADONet.connectionSQLServer);
-            dsData = sqlCommand.ExecuteReader();
-            if (dsData.HasRows)
-            {
-                dsData.Close();
-                sqlCommandDelete = new SqlCommand("delete from Customers where CustomerID = '" + idCustomer + "'", objADONet.connectionSQLServer);
-                sqlCommandDelete.ExecuteNonQuery();
-
-                return (Ok("Customer deleted succesfully."));
+                return Ok(new GeneralResponse<string>
+                {
+                    Response = Id + " has been deleted succesfuly."
+                });                
             }
-            else
-                return (Ok("Customer ID couldn't be found."));
-
-            objADONet.connectionSQLServer.Close();
-            objADONet.connectionSQLServer = null;
-            objADONet = null;
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
+                        ErrorMessage = "Internal Server Error",
+                        ErrorDetails = new List<ErrorDetail>
+                        {
+                            new ErrorDetail
+                            {
+                                InternalErrorCode = 500,
+                                Detail = e.Message
+                            }
+                        }
+                    });
+            }
         }
+
+        [HttpPost]
+        [Route("customerAddEF")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
+        // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
+        ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
+        ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        public async Task<ActionResult<Response<Customer>>> customerAddEF([FromBody] CustomerRequest customerPayload)
+        {            
+            try
+            {                
+                Customer customer = await _context.Customers.FindAsync(customerPayload.CustomerId);
+                if (customer != null)
+                {
+                    return StatusCode(StatusCodes.Status302Found, new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status302Found.ToString(),
+                        ErrorMessage = customerPayload.CustomerId + " already exists."
+                    });
+                }
+                else
+                {
+                    customer = new Customer
+                    {
+                        CustomerId = customerPayload.CustomerId,
+                        ContactName = customerPayload.ContactName,
+                        CompanyName = customerPayload.CompanyName
+                    };
+
+                    _context.Customers.Add(customer);                        
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(new GeneralResponse<string>
+                {
+                    Response = customerPayload.ContactName + " has been added succesfuly."
+                });                
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ErrorResponse
+                    {
+                        ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
+                        ErrorMessage = "Internal Server Error",
+                        ErrorDetails = new List<ErrorDetail>
+                        {
+                            new ErrorDetail
+                            {
+                                InternalErrorCode = 500,
+                                Detail = e.Message
+                            }
+                        }
+                    });
+            }
+        }
+
+        //[HttpPut]
+        //[Route("customer")]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
+        //// [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
+        //ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
+        //ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
+        //ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
+        //ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        //public async Task<ActionResult<Response<Customer>>> customer([FromBody] CustomerRequest customer, string Id)
+        //{
+        //    SqlCommand sqlCommand;
+        //    string tCustomerID, tContactName;
+
+        //    ADONet objADONet = new ADONet();
+        //    objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
+
+        //    try
+        //    {
+        //        try
+        //        {
+        //            sqlCommand = new SqlCommand("insert into Customers (Id, ContactName, CompanyName) values ('" + customer.Id + "','" + customer.ContactName + "', '" + customer.CompanyName + "')",
+        //                objADONet.connectionSQLServer);
+        //            sqlCommand.ExecuteNonQuery();
+
+        //            objADONet.connectionSQLServer.Close();
+        //            objADONet.connectionSQLServer = null;
+        //            objADONet = null;
+
+        //            return Ok(new GeneralResponse<string>
+        //            {
+        //                Response = customer.ContactName + " has been added succesfuly."
+        //            });
+        //        }
+        //        catch (Exception Ex)
+        //        {
+        //            objADONet.connectionSQLServer.Close();
+        //            objADONet.connectionSQLServer = null;
+        //            objADONet = null;
+
+        //            return StatusCode(StatusCodes.Status302Found,
+        //                new ErrorResponse
+        //                {
+        //                    ErrorCode = StatusCodes.Status302Found.ToString(),
+        //                    ErrorMessage = "Customer already exists"
+        //                });
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError,
+        //            new ErrorResponse
+        //            {
+        //                ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
+        //                ErrorMessage = "Internal Server Error",
+        //                ErrorDetails = new List<ErrorDetail>
+        //                {
+        //                    new ErrorDetail
+        //                    {
+        //                        InternalErrorCode = 500,
+        //                        Detail = e.Message
+        //                    }
+        //                }
+        //            });
+        //    }
+        //}
+
+        //[HttpDelete]
+        //[Route("customer")]
+        //public ActionResult<string> customerDelete(string idCustomer)
+        //{
+        //    SqlCommand sqlCommand, sqlCommandDelete;
+        //    SqlDataReader dsData = null;
+
+        //    ADONet objADONet = new ADONet();
+        //    objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
+
+        //    sqlCommand = new SqlCommand("select CustomerID from Customers where CustomerID = '" + idCustomer + "'", objADONet.connectionSQLServer);
+        //    dsData = sqlCommand.ExecuteReader();
+        //    if (dsData.HasRows)
+        //    {
+        //        dsData.Close();
+        //        sqlCommandDelete = new SqlCommand("delete from Customers where CustomerID = '" + idCustomer + "'", objADONet.connectionSQLServer);
+        //        sqlCommandDelete.ExecuteNonQuery();
+
+        //        return (Ok("Customer deleted succesfully."));
+        //    }
+        //    else
+        //        return (Ok("Customer ID couldn't be found."));
+
+        //    objADONet.connectionSQLServer.Close();
+        //    objADONet.connectionSQLServer = null;
+        //    objADONet = null;
+        //}
     }
 }
