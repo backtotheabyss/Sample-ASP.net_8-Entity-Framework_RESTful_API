@@ -32,13 +32,13 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("customerEF")]
+        [Route("customer")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>))]
         [ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Customer>>> customerEF([FromQuery, Required] string Id)
+        public async Task<ActionResult<Response<Customer>>> customer([FromQuery, Required] string Id)
         {
             Response<Customer> listCustomers = new Response<Customer>();
 
@@ -81,13 +81,13 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("customersEF")]
+        [Route("customers")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>))]
         [ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Customer>>> customersEF([FromQuery, Required] int rows)
+        public async Task<ActionResult<Response<Customer>>> customers([FromQuery, Required] int rows)
         {
             Response<Customer> listCustomers = new Response<Customer>();
 
@@ -130,14 +130,14 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("customers")]
+        [Route("customersNonEF")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Customer>>> customers([FromQuery, Required] int rows)
+        public async Task<ActionResult<Response<Customer>>> customersNonEF([FromQuery, Required] int rows)
         // public async Task<ActionResult<List<Customer>>> customers([FromQuery] int value)
         {
             SqlCommand sqlCommand;
@@ -223,14 +223,14 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpPut]
-        [Route("customerEditEF")]
+        [Route("customerEdit")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Customer>>> customerEditEF([FromBody] CustomerRequest customerPayload)
+        public async Task<ActionResult<Response<Customer>>> customerEdit([FromBody] CustomerRequest customerPayload)
         {
             try
             {                
@@ -277,14 +277,14 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpDelete]
-        [Route("customerDeleteEF")]
+        [Route("customerDelete")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Customer>>> customerDeleteEF(string Id)
+        public async Task<ActionResult<Response<Customer>>> customerDelete(string Id)
         {
             try
             {                
@@ -328,14 +328,14 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpPost]
-        [Route("customerAddEF")]
+        [Route("customerAdd")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Customer>>> customerAddEF([FromBody] CustomerRequest customerPayload)
+        public async Task<ActionResult<Response<Customer>>> customerAdd([FromBody] CustomerRequest customerPayload)
         {            
             try
             {                
@@ -384,99 +384,5 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                     });
             }
         }
-
-        //[HttpPut]
-        //[Route("customer")]
-        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
-        //// [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
-        //ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
-        //ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
-        //ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
-        //ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        //public async Task<ActionResult<Response<Customer>>> customer([FromBody] CustomerRequest customer, string Id)
-        //{
-        //    SqlCommand sqlCommand;
-        //    string tCustomerID, tContactName;
-
-        //    ADONet objADONet = new ADONet();
-        //    objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
-
-        //    try
-        //    {
-        //        try
-        //        {
-        //            sqlCommand = new SqlCommand("insert into Customers (Id, ContactName, CompanyName) values ('" + customer.Id + "','" + customer.ContactName + "', '" + customer.CompanyName + "')",
-        //                objADONet.connectionSQLServer);
-        //            sqlCommand.ExecuteNonQuery();
-
-        //            objADONet.connectionSQLServer.Close();
-        //            objADONet.connectionSQLServer = null;
-        //            objADONet = null;
-
-        //            return Ok(new GeneralResponse<string>
-        //            {
-        //                Response = customer.ContactName + " has been added succesfuly."
-        //            });
-        //        }
-        //        catch (Exception Ex)
-        //        {
-        //            objADONet.connectionSQLServer.Close();
-        //            objADONet.connectionSQLServer = null;
-        //            objADONet = null;
-
-        //            return StatusCode(StatusCodes.Status302Found,
-        //                new ErrorResponse
-        //                {
-        //                    ErrorCode = StatusCodes.Status302Found.ToString(),
-        //                    ErrorMessage = "Customer already exists"
-        //                });
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError,
-        //            new ErrorResponse
-        //            {
-        //                ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
-        //                ErrorMessage = "Internal Server Error",
-        //                ErrorDetails = new List<ErrorDetail>
-        //                {
-        //                    new ErrorDetail
-        //                    {
-        //                        InternalErrorCode = 500,
-        //                        Detail = e.Message
-        //                    }
-        //                }
-        //            });
-        //    }
-        //}
-
-        //[HttpDelete]
-        //[Route("customer")]
-        //public ActionResult<string> customerDelete(string idCustomer)
-        //{
-        //    SqlCommand sqlCommand, sqlCommandDelete;
-        //    SqlDataReader dsData = null;
-
-        //    ADONet objADONet = new ADONet();
-        //    objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
-
-        //    sqlCommand = new SqlCommand("select CustomerID from Customers where CustomerID = '" + idCustomer + "'", objADONet.connectionSQLServer);
-        //    dsData = sqlCommand.ExecuteReader();
-        //    if (dsData.HasRows)
-        //    {
-        //        dsData.Close();
-        //        sqlCommandDelete = new SqlCommand("delete from Customers where CustomerID = '" + idCustomer + "'", objADONet.connectionSQLServer);
-        //        sqlCommandDelete.ExecuteNonQuery();
-
-        //        return (Ok("Customer deleted succesfully."));
-        //    }
-        //    else
-        //        return (Ok("Customer ID couldn't be found."));
-
-        //    objADONet.connectionSQLServer.Close();
-        //    objADONet.connectionSQLServer = null;
-        //    objADONet = null;
-        //}
     }
 }
