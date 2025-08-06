@@ -153,7 +153,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
             {
                 objADONet.connectionSQLServer = objADONet.connectionOpen(objADONet.connectionSQLServer, 2);
 
-                sqlCommand = new SqlCommand("select TOP " + rows.ToString() + " Id, ContactName, CompanyName from Customers", objADONet.connectionSQLServer);
+                sqlCommand = new SqlCommand("select TOP " + rows.ToString() + " CustomerId, ContactName, CompanyName from Customers", objADONet.connectionSQLServer);
                 dsData = sqlCommand.ExecuteReader();
 
                 if (dsData.HasRows)
