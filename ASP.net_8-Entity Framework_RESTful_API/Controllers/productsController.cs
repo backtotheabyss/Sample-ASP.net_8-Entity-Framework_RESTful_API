@@ -3,14 +3,12 @@ using Microsoft.Data.Sql;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Linq.Dynamic.Core;
-using static Models.Models;
-using static Models.Product;
+using static DTO.DTO;
 
 namespace ASP.net_8_Entity_Framework_RESTful_API
 {
@@ -28,7 +26,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("products")]
+        [Route("entity/products")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Product>))]
         [ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
@@ -77,13 +75,13 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("productsNonEF")]
+        [Route("rawSQL/products")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Product>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Product>>> productsNonEF([FromQuery, Required] int value)
+        public async Task<ActionResult<Response<Product>>> productsrawSQL([FromQuery, Required] int value)
         {
             SqlCommand sqlCommand;
             SqlDataReader dsData = null;
@@ -145,14 +143,14 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("productsSortedNonEF")]
+        [Route("rawSQL/productsSortedNonEF")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Product>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
         //public ActionResult<List<string>> customersRetrieveTop(int value)
-        public async Task<ActionResult<string>> productsSortedNonEF([FromQuery, Required] string sortField, [FromQuery, Required] string sortCriteria)
+        public async Task<ActionResult<string>> productsSortedrawSQL([FromQuery, Required] string sortField, [FromQuery, Required] string sortCriteria)
         {
             SqlCommand sqlCommand;
             SqlDataReader dsData = null;
@@ -214,7 +212,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("productsSorted")]
+        [Route("entity/productsSorted")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Product>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),

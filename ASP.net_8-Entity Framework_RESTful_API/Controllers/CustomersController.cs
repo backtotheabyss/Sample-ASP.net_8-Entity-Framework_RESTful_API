@@ -2,18 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sql;
-
-using Microsoft.Data.Sql;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
-using static Models.Customer;
-using static Models.Models;
+using static DTO.DTO;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASP.net_8_Entity_Framework_RESTful_API
@@ -32,7 +28,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("customer")]
+        [Route("entity/customer")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>))]
         [ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
@@ -81,7 +77,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("customers")]
+        [Route("entity/customers")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>))]
         [ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
@@ -130,14 +126,14 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("customersNonEF")]
+        [Route("rawSQL/customers")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Customer>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<Response<Customer>>> customersNonEF([FromQuery, Required] int rows)
+        public async Task<ActionResult<Response<Customer>>> customersRawSQL([FromQuery, Required] int rows)
         // public async Task<ActionResult<List<Customer>>> customers([FromQuery] int value)
         {
             SqlCommand sqlCommand;
@@ -223,7 +219,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpPut]
-        [Route("customerEdit")]
+        [Route("entity/customerEdit")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
@@ -277,7 +273,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpDelete]
-        [Route("customerDelete")]
+        [Route("entity/customerDelete")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
@@ -328,7 +324,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpPost]
-        [Route("customerAdd")]
+        [Route("entity/customerAdd")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>)),
         // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
