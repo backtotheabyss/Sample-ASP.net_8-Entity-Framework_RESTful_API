@@ -1,0 +1,77 @@
+name: Build+Publish - Deploy
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+
+env:
+  AZURE_WEBAPP_NAME: ASPnet7RESTfulAPI
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.0.x'
+
+    - name: Restore
+      run: dotnet restore ./ASP.net_7_RESTful_API.sln
+      
+    - name: Build
+      run: dotnet build ./ASP.net_7_RESTful_API.sln --configuration Release --no-restore
+
+    - name: Build and Create ZIP
+      run: |
+        dotnet publish ./ASP.net_7_RESTful_API/ASP.net_7_RESTful_API.csproj --configuration Release --no-build --output './publish'
+        Compress-Archive -Path ./publish/* -DestinationPath ./publish/MyApp.zip
+
+    - name: Install dependencies
+      run: npm install
+
+    # Upload artifact 
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+    - run: |
+        cd ./publish
+        npm ci
+        npm run build --if-present
+
+    - name: Upload Build Artifact           
+      uses: actions/upload-artifact@v3            
+      with:        
+        name: drop #Artifact name
+        path: ./publish/MyApp.zip
+        
+  deploy:
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: drop
+          path: ./publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          slot-name: 'production'
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: ./publish/MyApp.zip

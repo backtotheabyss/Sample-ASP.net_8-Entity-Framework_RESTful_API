@@ -1,0 +1,44 @@
+trigger:
+- main
+
+pr:
+- main
+
+variables:
+  - name: 'BuildConfiguration'
+    value: 'Release'
+
+stages:
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: 'windows-latest'
+      workspace:
+        clean: all
+        
+    steps:
+    - task: DownloadBuildArtifacts@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        buildType: specific
+        project: 'ASP.net_7_RESTful_API'
+        pipeline: '3' 
+        artifactName: 'drop'
+        downloadPath: '$(Pipeline.Workspace)/MyApp'
+
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '3.x'
+        installationPath: $(Agent.ToolsDirectory)/dotnet
+        performMultiLevelLookup: true
+
+    - task: AzureWebApp@1
+      displayName: 'Azure Web App Deploy'
+      inputs:
+        azureSubscription: 'Azure subscription 1'
+        appName: 'ASPnet7RESTfulAPI'
+        package: '$(Pipeline.Workspace)/MyApp/MyApp.zip'
+        deploymentMethod: 'zipDeploy'
+        appType: 'webApp'
