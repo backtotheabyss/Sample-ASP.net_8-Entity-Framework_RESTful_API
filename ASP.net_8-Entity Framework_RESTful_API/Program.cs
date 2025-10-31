@@ -1,6 +1,5 @@
 using Models;
 using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -24,7 +23,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Additional service for background task
-// builder.Services.AddSingleton<Increment>();
+builder.Services.AddSingleton<Settings>();
 
 var app = builder.Build();
 

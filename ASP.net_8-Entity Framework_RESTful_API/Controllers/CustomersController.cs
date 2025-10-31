@@ -14,7 +14,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASP.net_8_Entity_Framework_RESTful_API
 {
-    [Route("api/customers")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CustomersController : ControllerBase
     {

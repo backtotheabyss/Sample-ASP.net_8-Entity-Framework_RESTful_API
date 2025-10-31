@@ -9,20 +9,23 @@ using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Linq.Dynamic.Core;
 using static DTO.DTO;
+using ASP.net_8_Entity_Framework_RESTful_API.Classes.Models;
 
 namespace ASP.net_8_Entity_Framework_RESTful_API
 {
-    [Route("api/products")]
+    [Route("api/[controller]")]
     [ApiController]
     public class productsController : ControllerBase
     {
         private readonly NorthwndContext _context;
         private readonly IConfiguration _configuration;
+        private readonly Settings _settings;
 
-        public productsController(NorthwndContext context, IConfiguration configuration)
+        public productsController(NorthwndContext context, IConfiguration configuration, Settings settings)
         {
             _context = context;
             _configuration = configuration;
+            _settings = settings;
         }
 
         [HttpGet]
@@ -143,7 +146,7 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet]
-        [Route("rawSQL/productsSortedNonEF")]
+        [Route("rawSQL/productsSorted")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<Product>)),
         ProducesResponseType(StatusCodes.Status302Found, Type = typeof(ErrorResponse)),
         ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse)),

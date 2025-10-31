@@ -1,0 +1,96 @@
+﻿using ASP.net_8_Entity_Framework_RESTful_API.Classes.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations;
+using static DTO.DTO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace ASP.net_8_Entity_Framework_RESTful_API
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class SettingsController : ControllerBase
+    {
+        private readonly NorthwndContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly Settings _settings;
+
+        public SettingsController(NorthwndContext context, IConfiguration configuration, Settings settings)
+        {
+            _context = context;
+            _configuration = configuration;
+            _settings = settings;
+        }
+
+        [HttpGet("printerSettings")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<SettingsConfiguration>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
+        public ActionResult<Response<SettingsConfiguration>> printerSettings()
+        {
+            try
+            {
+                if (_settings.settings == null || _settings.settings.PrinterSettings == null || !_settings.settings.PrinterSettings.Any())
+                {
+                    string tError = "Invalid or missing PrinterSettings configuration.";
+
+                    // Serilog.Log.Error(tError);
+                    return StatusCode(StatusCodes.Status404NotFound,
+                        new ErrorResponse
+                        {
+                            ErrorCode = StatusCodes.Status404NotFound.ToString(),
+                            ErrorMessage = tError
+                        });
+                }
+                else
+                {
+                    var results = new List<SettingsConfiguration>
+                    {
+                        new SettingsConfiguration
+                        {
+                            PrinterSettings = _settings.settings.PrinterSettings
+                                .Select(p => new PrinterItem
+                                {
+                                    Name = p.Name,
+                                    IP = p.IP,
+                                    Port = p.Port
+                                })
+                                .ToList()
+                        }
+                    };
+
+                    var response = new Response<SettingsConfiguration>
+                    {
+                        TotalCount = results.Count,
+                        Results = results
+                    };
+
+                    return Ok(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                string tError = "Error retrieving PrinterSettings configuration.";
+
+                // Serilog.Log.Error(ex, tError);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
+                {
+                    ErrorCode = StatusCodes.Status500InternalServerError.ToString(),
+                    ErrorMessage = tError,
+                    ErrorDetails =
+                    [
+                        new ErrorDetail
+                {
+                    InternalErrorCode = StatusCodes.Status500InternalServerError,
+                    Detail = ex.Message
+                }
+                    ]
+                });
+            }
+        }
+    }
+}
