@@ -21,7 +21,7 @@ public class Settings
     //public string sinologysinoToken = string.Empty;
 
     // public IList<SettingsConfiguration> settings { get; set; }
-    public SettingsConfiguration settings { get; set; } = new SettingsConfiguration();
+    public List<PrinterConfiguration> printerSettings { get; set; } = new List<PrinterConfiguration>();
     /* end settings */
 
     public Settings(IConfiguration configuration)    
@@ -36,16 +36,9 @@ public class Settings
         settingName1 = configuration["settingName1"] ?? string.Empty;
         settingName2 = configuration["settingName2"] ?? string.Empty;
 
-        settings = new SettingsConfiguration
-        {
-            PrinterSettings = configuration
+        printerSettings = configuration
                .GetSection("PrinterSettings")
-               .Get<List<PrinterItem>>() ?? new List<PrinterItem>()
-        };
-
-        //settings = configuration
-        //    .GetSection("ProductSettings")
-        //    .Get<List<SettingsConfiguration>>() ?? new List<SettingsConfiguration>();
+               .Get<List<PrinterConfiguration>>() ?? new List<PrinterConfiguration>();     
 
         /* end settings */
 

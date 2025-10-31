@@ -27,14 +27,14 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
         }
 
         [HttpGet("printerSettings")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<SettingsConfiguration>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Response<PrinterConfiguration>))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
-        public ActionResult<Response<SettingsConfiguration>> printerSettings()
+        public ActionResult<Response<PrinterConfiguration>> printerSettings()
         {
             try
             {
-                if (_settings.settings == null || _settings.settings.PrinterSettings == null || !_settings.settings.PrinterSettings.Any())
+                if (_settings == null || _settings.printerSettings == null || !_settings.printerSettings.Any())
                 {
                     string tError = "Invalid or missing PrinterSettings configuration.";
 
@@ -48,22 +48,19 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                 }
                 else
                 {
-                    var results = new List<SettingsConfiguration>
-                    {
-                        new SettingsConfiguration
-                        {
-                            PrinterSettings = _settings.settings.PrinterSettings
-                                .Select(p => new PrinterItem
-                                {
-                                    Name = p.Name,
-                                    IP = p.IP,
-                                    Port = p.Port
-                                })
-                                .ToList()
-                        }
-                    };
+                    var results = new List<PrinterConfiguration>();
+                    results = new List<PrinterConfiguration>
+                    (
+                        _settings.printerSettings
+                            .Select(p => new PrinterConfiguration
+                            {
+                                Name = p.Name,
+                                IP = p.IP,
+                                Port = p.Port
+                            })
+                    );
 
-                    var response = new Response<SettingsConfiguration>
+                    var response = new Response<PrinterConfiguration>
                     {
                         TotalCount = results.Count,
                         Results = results
