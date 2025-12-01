@@ -22,6 +22,7 @@ public class Settings
 
     // public IList<SettingsConfiguration> settings { get; set; }
     public List<PrinterConfiguration> printerSettings { get; set; } = new List<PrinterConfiguration>();
+    private readonly IConfiguration _configuration;
     /* end settings */
 
     public Settings(IConfiguration configuration)    
@@ -33,10 +34,12 @@ public class Settings
         //sinologySid = string.Empty;
         //sinologysinoToken = string.Empty;
 
-        settingName1 = configuration["settingName1"] ?? string.Empty;
-        settingName2 = configuration["settingName2"] ?? string.Empty;
+        _configuration = configuration;
 
-        printerSettings = configuration
+        settingName1 = _configuration["settingName1"] ?? string.Empty;
+        settingName2 = _configuration["settingName2"] ?? string.Empty;
+
+        printerSettings = _configuration
                .GetSection("PrinterSettings")
                .Get<List<PrinterConfiguration>>() ?? new List<PrinterConfiguration>();     
 

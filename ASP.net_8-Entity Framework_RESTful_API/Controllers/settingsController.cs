@@ -38,7 +38,6 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                 {
                     string tError = "Invalid or missing PrinterSettings configuration.";
 
-                    // Serilog.Log.Error(tError);
                     return StatusCode(StatusCodes.Status404NotFound,
                         new ErrorResponse
                         {
@@ -48,22 +47,11 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                 }
                 else
                 {
-                    var results = new List<PrinterConfiguration>();
-                    results = new List<PrinterConfiguration>
-                    (
-                        _settings.printerSettings
-                            .Select(p => new PrinterConfiguration
-                            {
-                                Name = p.Name,
-                                IP = p.IP,
-                                Port = p.Port
-                            })
-                    );
-
-                    var response = new Response<PrinterConfiguration>
+                    var result = _settings.printerSettings ?? new List<PrinterConfiguration>();
+                    var response = new Response<PrinterConfiguration> ()
                     {
-                        TotalCount = results.Count,
-                        Results = results
+                        TotalCount = result.Count,                        
+                        Results = result
                     };
 
                     return Ok(response);
@@ -81,10 +69,10 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
                     ErrorDetails =
                     [
                         new ErrorDetail
-                {
-                    InternalErrorCode = StatusCodes.Status500InternalServerError,
-                    Detail = ex.Message
-                }
+                        {
+                            InternalErrorCode = StatusCodes.Status500InternalServerError,
+                            Detail = ex.Message
+                        }
                     ]
                 });
             }

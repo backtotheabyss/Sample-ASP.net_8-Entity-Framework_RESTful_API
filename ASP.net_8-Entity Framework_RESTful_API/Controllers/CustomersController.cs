@@ -20,7 +20,6 @@ namespace ASP.net_8_Entity_Framework_RESTful_API
     {
         private readonly NorthwndContext _context;
         private readonly IConfiguration _configuration;
-
         public CustomersController (NorthwndContext context, IConfiguration configuration)
         {
             _context = context;
